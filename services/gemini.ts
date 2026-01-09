@@ -1,7 +1,8 @@
 import { GoogleGenAI, GenerateContentResponse, Part } from "@google/genai";
 import { AppMode, AspectRatio } from "../types";
 
-const MODEL_NAME = 'gemini-2.5-flash-image';
+// Đổi sang model stable với quota cao hơn
+const MODEL_NAME = 'gemini-1.5-pro-latest'; // Hoặc 'gemini-1.5-flash-latest'
 
 // Sửa cách lấy API key - tương thích với Vercel
 const getApiKey = () => {
@@ -97,26 +98,36 @@ export const processImage = async (
 
   parts.push({ text: prompt });
 
-  const response: GenerateContentResponse = await ai.models.generateContent({
-    model: MODEL_NAME,
-    contents: { parts },
-    config: {
-      imageConfig: {
-        aspectRatio: aspectRatio as any
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: MODEL_NAME,
+      contents: { parts },
+      config: {
+        imageConfig: {
+          aspectRatio: aspectRatio as any
+        }
+      }
+    });
+
+    if (!response.candidates?.[0]?.content?.parts) {
+      throw new Error("No image generated from API");
+    }
+
+    // Find the image part in the response
+    for (const part of response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        return `data:image/png;base64,${part.inlineData.data}`;
       }
     }
-  });
 
-  if (!response.candidates?.[0]?.content?.parts) {
-    throw new Error("No image generated from API");
-  }
-
-  // Find the image part in the response
-  for (const part of response.candidates[0].content.parts) {
-    if (part.inlineData) {
-      return `data:image/png;base64,${part.inlineData.data}`;
+    throw new Error("Could not find image in API response");
+  } catch (error: any) {
+    // Handle quota errors specifically
+    if (error?.message?.includes('quota') || error?.message?.includes('RESOURCE_EXHAUSTED')) {
+      throw new Error(
+        "⚠️ Daily quota exceeded. Please try again in 24 hours or upgrade to a paid plan at https://console.cloud.google.com/billing"
+      );
     }
+    throw error;
   }
-
-  throw new Error("Could not find image in API response");
 };
