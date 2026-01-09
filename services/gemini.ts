@@ -1,8 +1,13 @@
-
 import { GoogleGenAI, GenerateContentResponse, Part } from "@google/genai";
 import { AppMode, AspectRatio } from "../types";
 
 const MODEL_NAME = 'gemini-2.5-flash-image';
+
+// Sửa cách lấy API key - tương thích với Vercel
+const getApiKey = () => {
+  // Vercel sẽ inject env vars vào process.env
+  return import.meta.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || process.env.API_KEY;
+};
 
 export const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -21,11 +26,16 @@ export const processImage = async (
   modelImage: File,
   productImages: File[],
   aspectRatio: AspectRatio,
-  maskImage?: string, // base64 mask
+  maskImage?: string,
   poseInstruction?: string
 ): Promise<string> => {
-  // Always use {apiKey: process.env.API_KEY} directly
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  const apiKey = getApiKey();
+  
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured. Please add it in Vercel Environment Variables.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
   
   const parts: Part[] = [];
   
