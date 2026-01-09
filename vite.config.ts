@@ -12,7 +12,6 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [react()],
     define: {
-      // Expose env variables to client-side code
       'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY),
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY)
@@ -21,11 +20,7 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, '.'),
       }
-    },
-    build: {
-      outDir: 'dist',
-      sourcemap: false,
-      minify: 'esbuild', // Dùng esbuild thay vì terser - nhanh hơn và built-in
     }
+    // XÓA HOÀN TOÀN phần build config - để Vite dùng default
   };
 });
