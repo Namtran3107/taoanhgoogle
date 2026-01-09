@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: false,
-      minify: 'terser',
+      minify: 'esbuild', // Dùng esbuild thay vì terser - nhanh hơn và built-in
     }
   };
 });
