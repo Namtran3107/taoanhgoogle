@@ -1,0 +1,7 @@
+{
+  "name": "AI Fashion Studio",
+  "description": "An advanced AI-powered fashion image editor for virtual try-ons, pose changes, and object removal.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
